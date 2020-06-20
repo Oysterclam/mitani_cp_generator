@@ -1,0 +1,3 @@
+nodes - vertices in finished triangulation
+ele   - triangles, vertices of each triangle indexed like in nodes
+boundaries: I think nonzero boundary values mean it is on a boundary? 
