@@ -10,6 +10,7 @@
 #include <GLUT/glut.h>
 #include <string.h>
 #include "triangle.h"
+#include "generate_creases.h"
 
 struct triangulateio *in, *out;
 
@@ -17,6 +18,11 @@ void keyPressed (unsigned char key, int x, int y) {
 	if(key == 'q'){
 		printf("dawnaballz\n");
 		exit(0);
+	}
+	if(key == 'g'){
+		in = init_in(14);
+		out = init_out(in);
+		triangulate("pcez", in, out, NULL);
 	}
 }
 void display(){
@@ -38,9 +44,9 @@ void display(){
 	// 	glEnd();
 	// }
 
-	glPushAttrib(GL_ENABLE_BIT); 
-	glLineStipple(7, 0xAAAA);  
-	glEnable(GL_LINE_STIPPLE);
+	// glPushAttrib(GL_ENABLE_BIT); 
+	// glLineStipple(7, 0xAAAA);  
+	// glEnable(GL_LINE_STIPPLE);
 
 	for(int i=0;i<2*out->numberofedges;i+=2){
 
@@ -51,7 +57,7 @@ void display(){
 
 	}
 
-	glPopAttrib();
+	// glPopAttrib();
 
 	glFlush();
 }
@@ -60,54 +66,12 @@ int main(int argc, char *argv[])
 {
 	srand(time(0)); 
 
-
-	in = (struct triangulateio*) malloc(sizeof(struct triangulateio));
-
-	in->numberofpoints = 14;
-	in->numberofpointattributes = 0;
-	in->numberofholes = 0;
-	in->numberofregions = 0;
-	in->numberofsegments = 0;
-	in->numberoftriangles = 0;
-
-
-	in->pointlist = (REAL*) malloc(in->numberofpoints*2*sizeof(REAL));
-	in->pointattributelist = NULL;
-	in->pointmarkerlist = NULL;
-	in->segmentmarkerlist = NULL;
-	in->segmentlist = NULL;
-	in->holelist = NULL;
-	in->regionlist = NULL;
-
-	in->pointlist[0] = 0;
-	in->pointlist[1] = 0;
-	in->pointlist[2] = 0;
-	in->pointlist[3] = 100;
-	in->pointlist[4] = 100;
-	in->pointlist[5] = 100;
-	in->pointlist[6] = 100;
-	in->pointlist[7] = 0;
-	for(int i=8;i<28;i++){
-		in->pointlist[i] = rand()%100;
-	}
-
-
-	out = (struct triangulateio*) malloc(sizeof(struct triangulateio));
-	out->pointlist = in->pointlist;
-	out->pointmarkerlist = NULL;
-	out->trianglelist = NULL;
-	out->segmentlist = NULL;
-	out->segmentmarkerlist = NULL;
-	out->edgelist = NULL;
-	out->edgemarkerlist = NULL;
-
-
-
+	in = init_in(14);
+	out = init_out(in);
 	triangulate("pcez", in, out, NULL);
 
 
 
-	write_poly(10, 100, 100, "triangle/dawna.poly");
 	int duh = 2;
 	printf("%d\n",~duh);
 	glutInit(&argc, argv);
