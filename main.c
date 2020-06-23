@@ -14,15 +14,60 @@
 
 struct triangulateio *in, *out;
 
+void printrowsandevens(int **dawna){
+			for(int i=0;i<14;i++){
+			for(int j=0;j<14;j++){
+				printf("%d ",dawna[i][j]);
+			}
+			printf("\n");
+		}
+
+		for(int i=0;i<14;i++){
+			int sum = 0 ;
+			for(int j=0;j<14;j++){
+				if(dawna[i][j]==1){
+					sum++;
+				}
+			}
+			printf("%d\n",sum%2);
+		}
+}
 void keyPressed (unsigned char key, int x, int y) {  
 	if(key == 'q'){
 		printf("dawnaballz\n");
 		exit(0);
 	}
 	if(key == 'g'){
-		in = init_in(14);
-		out = init_out(in);
-		triangulate("pcez", in, out, NULL);
+		int **dawna; 
+		int sum = 1;
+				sum = 0;
+			in = init_in(14);
+			out = init_out(in);
+			triangulate("pcez", in, out, NULL);
+			dawna = edgelist_to_matrix(out);
+
+			evenize(dawna, 14);
+			for(int e=0;e<out->numberofpoints;e++){
+				int rowsum = 0;
+				for(int f=0;f<out->numberofpoints;f++){
+					if(dawna[e][f]==1){
+						rowsum++;
+					}
+				}
+				sum+=(rowsum%2);
+			}
+		printrowsandevens(dawna);
+		dawna[0][1]=1;
+		dawna[0][3]=1;
+		dawna[1][0]=1;
+		dawna[1][2]=1;
+		dawna[2][1]=1;
+		dawna[2][3]=1;
+		dawna[3][0]=1;
+		dawna[3][2]=1;
+		replace_edgelist_using_matrix(out, dawna);
+
+		glutPostRedisplay();
 	}
 }
 void display(){
@@ -71,7 +116,6 @@ int main(int argc, char *argv[])
 	triangulate("pcez", in, out, NULL);
 
 
-
 	int duh = 2;
 	printf("%d\n",~duh);
 	glutInit(&argc, argv);
@@ -84,8 +128,8 @@ int main(int argc, char *argv[])
     glOrtho(-10.f, 110.f, -10.f, 110.f, 0.f, 1.f );
     glutKeyboardFunc(keyPressed);
     glutDisplayFunc(display);
-    glutIdleFunc(display);
     glutMainLoop();
-
+    free_t(in);
+    free_t(out);
 	return 0;
 }
