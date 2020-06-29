@@ -37,3 +37,5 @@ REAL anglebetween(REAL x1, REAL y1, REAL xc, REAL yc, REAL x2, REAL y2);
 REAL *angles(int *indices, REAL *pointlist, int center_index, int points);
 
 void clockwiseSelect(int *indices, REAL *pointlist, int center_index, int start, int end);
+
+REAL kawasakisum(REAL *angles, int anglecount, int parity);

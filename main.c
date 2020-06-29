@@ -50,20 +50,27 @@ void keyPressed (unsigned char key, int x, int y) {
 	if(key == 'g'){
 		int **dawna; 
 		int sum = 1;
+		while(sum!=0){
+			in = init_in(14);
+			out = init_out(in);
+			triangulate("pcez", in, out, NULL);
 			sum = 0;
-		dawna = edgelist_to_matrix(out);
-
-		evenize(dawna,14);
-		for(int e=0;e<out->numberofpoints;e++){
-			int rowsum = 0;
-			for(int f=0;f<out->numberofpoints;f++){
-				if(dawna[e][f]==1){
-					rowsum++;
+			dawna = edgelist_to_matrix(out);
+			evenize(dawna,14);
+			for(int e=0;e<out->numberofpoints;e++){
+				int rowsum = 0;
+				for(int f=0;f<out->numberofpoints;f++){
+					if(dawna[e][f]==1){
+						rowsum++;
+					}
 				}
+				sum+=(rowsum%2);
 			}
-			sum+=(rowsum%2);
 		}
+		
 		printrowsandevens(dawna);
+
+
 		dawna[0][1]=1;
 		dawna[0][3]=1;
 		dawna[1][0]=1;
@@ -119,11 +126,9 @@ void display(){
 	}
 	glEnd();
 
-	// qsort(dawna2, ind, sizeof(int), clockwiseof1);
-	clockwiseSelect(dawna2, out->pointlist, 5, 0, ind);
-	printf("%d\n\n",ind);
+	qsort(dawna2, ind, sizeof(int), clockwiseof1);
+	// clockwiseSelect(dawna2, out->pointlist, 5, 0, ind);
 	for(int i=0;i<ind;i++){
-		printf("odk\n");
 		glBegin(GL_POINTS);
 		glColor3ub(255, 0, 0);
 		glEnd();
@@ -135,7 +140,6 @@ void display(){
 	}
 	REAL *anglez = angles(dawna2, out->pointlist, 5, ind);
 	for(int i=0;i<ind;i++){
-		printf("dawna\n");
 		glRasterPos3f((out->pointlist[2*dawna2[i]]-out->pointlist[10])/7+out->pointlist[10],
 						(out->pointlist[2*dawna2[(i+1)%ind]] - out->pointlist[11])/7+out->pointlist[11],0);
 
@@ -143,6 +147,13 @@ void display(){
 		sprintf(gonad, "%f",anglez[i]);
 		drawstring(out->pointlist[2*dawna2[i]],out->pointlist[2*dawna2[i]+1],0,gonad);
 	}
+
+		printf("even %f\n",kawasakisum(anglez,ind,0));
+		printf("odd %f\n",kawasakisum(anglez,ind,1));
+		printf("sum %f\n",kawasakisum(anglez,ind,0)+kawasakisum(anglez,ind,1));
+
+
+
 
 	glEnd();
 	glPointSize(15);

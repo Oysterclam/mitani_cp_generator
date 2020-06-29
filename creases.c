@@ -201,8 +201,20 @@ int clockwiseof(int ind1, int ind2, int center_index, REAL *pointlist){
 	REAL y1 = pointlist[2*ind1+1] - pointlist[2*center_index+1];
 	REAL x2 = pointlist[2*ind2] - pointlist[2*center_index];
 	REAL y2 = pointlist[2*ind2+1] - pointlist[2*center_index+1];
+
 	printf("%f, %f, %f, %f\n",x1,y1,x2,y2);
     int crossprod =  cross(x1,y1,x2,y2);
+	return crossprod;
+}
+
+double newclockwiseof(int ind1, int ind2, int center_index, REAL *pointlist){
+	// printf("crossing %d, %d\n",ind1,ind2);
+	REAL x1 = pointlist[2*ind1] - pointlist[2*center_index];
+	REAL y1 = pointlist[2*ind1+1] - pointlist[2*center_index+1];
+	REAL x2 = pointlist[2*ind2] - pointlist[2*center_index];
+	REAL y2 = pointlist[2*ind2+1] - pointlist[2*center_index+1];
+
+	double crossprod =  cross(x1,y1,x2,y2);
 	return crossprod;
 }
 
@@ -251,7 +263,7 @@ void clockwisesort(int *indices, REAL *pointlist, int center_index, int start, i
 void clockwiseSelect(int *indices, REAL *pointlist, int center_index, int start, int end){
 	for(int i=start;i>end;i++){
 		int j = i;
-		while(j>start && clockwiseof(indices[j], indices[j-1], center_index, pointlist)>0){
+		while(j>start && newclockwiseof(indices[j], indices[j-1], center_index, pointlist)>0.0){
 			swap(indices, j, j-1);
 			j--;
 		}
@@ -303,10 +315,7 @@ REAL anglebetween(REAL x1, REAL y1, REAL xc, REAL yc, REAL x2, REAL y2){
 
 REAL *angles(int *indices, REAL *pointlist, int center_index, int points){
 	REAL *angles = (REAL*) malloc(points*sizeof(REAL));
-	printf("%d points\n",points);
 	for(int i=0;i<points;i++){
-		printf("%d\n",i);
-
 		angles[i] = anglebetween(
 						pointlist[2*indices[i]],
 						pointlist[2*indices[i]+1],
@@ -316,8 +325,14 @@ REAL *angles(int *indices, REAL *pointlist, int center_index, int points){
 						pointlist[2*indices[(i+1)%points]+1]);
 	}
 	return angles;
-
-
 }
 
-
+REAL kawasakisum(REAL *angles, int anglecount, int parity){
+	int ind = parity;
+	REAL accum = 0; 
+	while(ind < anglecount){
+		accum += angles[ind];
+		ind += 2;
+	}
+	return accum;
+}
