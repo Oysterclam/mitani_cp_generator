@@ -11,7 +11,6 @@
 #include "generate_creases.h"
 #include "triangle.h"
 
-
 void write_poly(int n, int xrange, int yrange, char* filename){
 	// srand(time(0)); 
 	FILE *fp;
@@ -34,7 +33,7 @@ struct triangulateio *init_in(int n){
 		return NULL;
 	}
 	struct triangulateio *in;
-	// srand(time(0)); 
+	srand(time(0)); 
 
 	in = (struct triangulateio*) malloc(sizeof(struct triangulateio));
 
@@ -196,40 +195,52 @@ void swap(int *dawna, int ind1, int ind2){
 	dawna[ind2] = temp;
 }
 
-int clockwiseof(int ind1, int ind2, REAL cx, REAL cy, int *pointlist){
-	REAL x1 = pointlist[2*ind1] - cx;
-	REAL y1 = pointlist[2*ind1+1] - cy;
-	REAL x2 = pointlist[2*ind2] - cx;
-	REAL y2 = pointlist[2*ind2+1] - cy;
-	return cross(x1,y1,x2,y2);
+int clockwiseof(int ind1, int ind2, int center_index, REAL *pointlist){
+	// printf("crossing %d, %d\n",ind1,ind2);
+	REAL x1 = pointlist[2*ind1] - pointlist[2*center_index];
+	REAL y1 = pointlist[2*ind1+1] - pointlist[2*center_index+1];
+	REAL x2 = pointlist[2*ind2] - pointlist[2*center_index];
+	REAL y2 = pointlist[2*ind2+1] - pointlist[2*center_index+1];
+	printf("%f, %f, %f, %f\n",x1,y1,x2,y2);
+    int crossprod =  cross(x1,y1,x2,y2);
+	return crossprod;
 }
 
-int partitionq(int *indices, int *pointlist, int center_index, int start, int end){
+int partitionq(int *indices, REAL *pointlist, int center_index, int start, int end){
 	srand(time(0));
-	printf("%d\n",pointlist[0]);
-	REAL center_x = pointlist[2*center_index];
-	REAL center_y = pointlist[2*center_index+1];
 	int p = start+(rand()%(end-start));
 	swap(indices, start, p);
 	int i = start;
 	int j = end;
 
 	while(i<j){
-		while(clockwiseof(j, p, center_x, center_y, pointlist)<0 && i<j){
+		// printf("partitioning\n");
+		for(int a=start;a<=end;a++){
+			printf("%d,",indices[a]);
+		}
+		printf("\n");
+		printf("partition %d\n",p);
+		printf("%d\n",clockwiseof(j, p, center_index, pointlist));
+		printf("%d\n",clockwiseof(i, p, center_index, pointlist));
+		while(clockwiseof(j, p, center_index, pointlist)>0.0 && i<j){
 			j--;
 		}
-		while(clockwiseof(i, p, center_x, center_y, pointlist)>=0 && i<j){
+		while(clockwiseof(i, p, center_index, pointlist)<=0.0 && i<j){
 			i++;
 		}
 		if(i<j){
-			swap(indices, i, j);
+			printf("%d,%d\n",i,j);
+			swap(indices, i,j);
+		}
+		else{
+			break;
 		}
 	}
 	swap(indices, start, i);
 	return i;
-
 }
-void clockwisesort(int *indices, int *pointlist, int center_index, int start, int end){
+void clockwisesort(int *indices, REAL *pointlist, int center_index, int start, int end){
+	printf("sorting\n");
 	if(start<end){
 		int p = partitionq(indices, pointlist, center_index, start, end);
 		clockwisesort(indices, pointlist, center_index, start, p-1);
@@ -237,6 +248,16 @@ void clockwisesort(int *indices, int *pointlist, int center_index, int start, in
 	}
 }
 
+void clockwiseSelect(int *indices, REAL *pointlist, int center_index, int start, int end){
+	for(int i=start;i>end;i++){
+		int j = i;
+		while(j>start && clockwiseof(indices[j], indices[j-1], center_index, pointlist)>0){
+			swap(indices, j, j-1);
+			j--;
+		}
+	}
+
+}
 
 void drawstring(int x, int y, int z, const char *s)   {
 	int i;
@@ -268,5 +289,35 @@ void printrowsandevens(int **dawna){
 	printevens(dawna);
 }
 
+REAL anglebetween(REAL x1, REAL y1, REAL xc, REAL yc, REAL x2, REAL y2){
+	REAL v1x = x1 - xc;
+	REAL v1y = y1 - yc;
+	REAL v2x = x2 - xc;
+	REAL v2y = y2 - yc;
+	REAL d1 = sqrt(v1x*v1x + v1y*v1y);
+	REAL d2 = sqrt(v2x*v2x + v2y*v2y);
+	REAL dot = v1x*v2x + v1y*v2y;
+	REAL angle = acos(dot/d1/d2);
+	return angle*180/3.14159265358;
+}
+
+REAL *angles(int *indices, REAL *pointlist, int center_index, int points){
+	REAL *angles = (REAL*) malloc(points*sizeof(REAL));
+	printf("%d points\n",points);
+	for(int i=0;i<points;i++){
+		printf("%d\n",i);
+
+		angles[i] = anglebetween(
+						pointlist[2*indices[i]],
+						pointlist[2*indices[i]+1],
+						pointlist[2*center_index],
+						pointlist[2*center_index+1],
+						pointlist[2*indices[(i+1)%points]],
+						pointlist[2*indices[(i+1)%points]+1]);
+	}
+	return angles;
+
+
+}
 
 

@@ -30,11 +30,9 @@ int clockwiseof1(const void * a, const void * b){
         return -1;
     if (x1 == 0 && x2 == 0) {
         if (y1 >= 0 || y2 >= 0)
-            return y1 - y2;
-        return y2 - y1;
+            return 0;
     }
 	int crossprod = cross(x1,y1,x2,y2);
-		printf("%f,%f and %f,%f : %d\n",x1,y1,x2,y2,crossprod);
 	return crossprod;
 }
 
@@ -120,20 +118,12 @@ void display(){
 		}
 	}
 	glEnd();
-	for(int i=0;i<ind;i++){
-		glBegin(GL_POINTS);
-		glColor3ub(255, 0, 0);
-		glEnd();
-		glVertex3f(out->pointlist[2*dawna2[i]],out->pointlist[2*dawna2[i]+1],0);
-		glRasterPos3f(out->pointlist[2*dawna2[i]]-2,out->pointlist[2*dawna2[i]+1],0);
-		char gonad[30];
-		sprintf(gonad, "%d",i);
-		drawstring(out->pointlist[2*dawna2[i]],out->pointlist[2*dawna2[i]+1],0,gonad);
-	}
-	qsort(dawna2, ind, sizeof(int), clockwiseof1);
-	// clockwisesort(dawna, out->pointlist, 5, 0, ind);
+
+	// qsort(dawna2, ind, sizeof(int), clockwiseof1);
+	clockwiseSelect(dawna2, out->pointlist, 5, 0, ind);
 	printf("%d\n\n",ind);
 	for(int i=0;i<ind;i++){
+		printf("odk\n");
 		glBegin(GL_POINTS);
 		glColor3ub(255, 0, 0);
 		glEnd();
@@ -141,6 +131,16 @@ void display(){
 		glRasterPos3f(out->pointlist[2*dawna2[i]]+2,out->pointlist[2*dawna2[i]+1],0);
 		char gonad[30];
 		sprintf(gonad, "%d",i);
+		drawstring(out->pointlist[2*dawna2[i]],out->pointlist[2*dawna2[i]+1],0,gonad);
+	}
+	REAL *anglez = angles(dawna2, out->pointlist, 5, ind);
+	for(int i=0;i<ind;i++){
+		printf("dawna\n");
+		glRasterPos3f((out->pointlist[2*dawna2[i]]-out->pointlist[10])/7+out->pointlist[10],
+						(out->pointlist[2*dawna2[(i+1)%ind]] - out->pointlist[11])/7+out->pointlist[11],0);
+
+		char gonad[30];
+		sprintf(gonad, "%f",anglez[i]);
 		drawstring(out->pointlist[2*dawna2[i]],out->pointlist[2*dawna2[i]+1],0,gonad);
 	}
 
