@@ -12,7 +12,8 @@
 #include "triangle.h"
 
 void write_poly(int n, int xrange, int yrange, char* filename){
-	// srand(time(0)); 
+	srand(time(0)); 
+	//print a bunch of things
 	FILE *fp;
 	fp = fopen(filename, "w+");
 	fprintf(fp, "%d %d %d %d\n", n+4, 2, 0, 0);
@@ -28,6 +29,8 @@ void write_poly(int n, int xrange, int yrange, char* filename){
 }
 
 struct triangulateio *init_in(int n){
+	//Initialize a crease pattern with n points. 
+	//4 corners of square, and the others randomly distributed inside. 
 	if(n<4){
 		printf("too few\n");
 		return NULL;
@@ -67,6 +70,7 @@ struct triangulateio *init_in(int n){
 }
 
 struct triangulateio *init_out(struct triangulateio *in){
+	//intialize the out datastructure, containing voronoi points calculated by triangle
 	struct triangulateio *out;
 	out = (struct triangulateio*) malloc(sizeof(struct triangulateio));
 	out->pointlist = in->pointlist;
@@ -80,6 +84,7 @@ struct triangulateio *init_out(struct triangulateio *in){
 }
 
 int **edgelist_to_matrix(struct triangulateio *t){
+	//create an undirected matrix, array** based on a list of edges
 	int edges = t->numberofedges;
 	int points = t->numberofpoints;
 	int **matrix = (int**) calloc(points,sizeof(int*));
@@ -128,6 +133,9 @@ void evenize(int **matrix, int n){
 removes 1's so that the number of 1's in each row/column is even
 I think this is O(n^2)
 */
+//I think this is the thing that doesn't work so well...
+//Doesn't always work
+
 	int sum;
 	int evens[n];
 	for(int i=0;i<n;i++){
@@ -154,38 +162,10 @@ I think this is O(n^2)
 		}
 	}
 
-
-	// int evens[n];
-	// for(int i=0;i<n;i++){
-	// 	int sum = 0;
-	// 	for(int j=0;j<n;j++){
-	// 		sum+=matrix[i][j];
-	// 	}
-	// 	if(sum%2==0){
-	// 		evens[i]=1;
-	// 	}
-	// }
-	// for(int i=0;i<n;i++){
-	// 	if(evens[i]!=1){
-	// 		for(int j=i;j<n;j++){
-	// 			if(matrix[i][j]==1 && evens[j]!=1) {
-	// 				matrix[i][j]=0;
-	// 				matrix[j][i]=0;
-	// 				evens[j]=1;
-	// 				break;
-	// 			}
-	// 			if(j==n-1){
-	// 				printf("got to end oops\n");
-	// 			}
-	// 		}
-	// 		evens[i]=1;
-	// 		printf("\n");
-	// 	}
-	// }
 }
 
-
 REAL cross(REAL x1, REAL y1, REAL x2, REAL y2){
+	//cross product
 	return (x1*y2 - x2*y1);
 }
 
@@ -196,7 +176,9 @@ void swap(int *dawna, int ind1, int ind2){
 }
 
 int clockwiseof(int ind1, int ind2, int center_index, REAL *pointlist){
-	// printf("crossing %d, %d\n",ind1,ind2);
+	//this takes three points: p1=(x1,y1), p2=(x2,y2), and a center point
+	//returns the cross product of the vectors from center to p1 and then p2
+	//indicating whether p2 is clockwise from p1 or not
 	REAL x1 = pointlist[2*ind1] - pointlist[2*center_index];
 	REAL y1 = pointlist[2*ind1+1] - pointlist[2*center_index+1];
 	REAL x2 = pointlist[2*ind2] - pointlist[2*center_index];
@@ -207,18 +189,8 @@ int clockwiseof(int ind1, int ind2, int center_index, REAL *pointlist){
 	return crossprod;
 }
 
-double newclockwiseof(int ind1, int ind2, int center_index, REAL *pointlist){
-	// printf("crossing %d, %d\n",ind1,ind2);
-	REAL x1 = pointlist[2*ind1] - pointlist[2*center_index];
-	REAL y1 = pointlist[2*ind1+1] - pointlist[2*center_index+1];
-	REAL x2 = pointlist[2*ind2] - pointlist[2*center_index];
-	REAL y2 = pointlist[2*ind2+1] - pointlist[2*center_index+1];
-
-	double crossprod =  cross(x1,y1,x2,y2);
-	return crossprod;
-}
-
 int partitionq(int *indices, REAL *pointlist, int center_index, int start, int end){
+	//clockwise quicksort
 	srand(time(0));
 	int p = start+(rand()%(end-start));
 	swap(indices, start, p);
@@ -252,7 +224,8 @@ int partitionq(int *indices, REAL *pointlist, int center_index, int start, int e
 	return i;
 }
 void clockwisesort(int *indices, REAL *pointlist, int center_index, int start, int end){
-	printf("sorting\n");
+	//clockwise quicksort. Not used since I just used the optimized qsort from library
+	//I think it had to do with being much easier with how I arranged the data structures
 	if(start<end){
 		int p = partitionq(indices, pointlist, center_index, start, end);
 		clockwisesort(indices, pointlist, center_index, start, p-1);
@@ -261,17 +234,18 @@ void clockwisesort(int *indices, REAL *pointlist, int center_index, int start, i
 }
 
 void clockwiseSelect(int *indices, REAL *pointlist, int center_index, int start, int end){
+	//select sort clockwise?
 	for(int i=start;i>end;i++){
 		int j = i;
-		while(j>start && newclockwiseof(indices[j], indices[j-1], center_index, pointlist)>0.0){
+		while(j>start && clockwiseof(indices[j], indices[j-1], center_index, pointlist)>0.0){
 			swap(indices, j, j-1);
 			j--;
 		}
 	}
-
 }
 
 void drawstring(int x, int y, int z, const char *s)   {
+	//use opengl draw a word
 	int i;
 	for (i = 0; i < strlen(s); i++)
 	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, s[i]);
@@ -286,6 +260,8 @@ void printrows(int **dawna){
 }
 
 void printevens(int **dawna){
+	//NEEDS TO GENERALIZE PAST 14
+	//though I don't think this is used anywhere
 	for(int i=0;i<14;i++){
 		int sum = 0 ;
 		for(int j=0;j<14;j++){
@@ -302,6 +278,7 @@ void printrowsandevens(int **dawna){
 }
 
 REAL anglebetween(REAL x1, REAL y1, REAL xc, REAL yc, REAL x2, REAL y2){
+	//angle between two vectors
 	REAL v1x = x1 - xc;
 	REAL v1y = y1 - yc;
 	REAL v2x = x2 - xc;
@@ -314,6 +291,10 @@ REAL anglebetween(REAL x1, REAL y1, REAL xc, REAL yc, REAL x2, REAL y2){
 }
 
 REAL *angles(int *indices, REAL *pointlist, int center_index, int points){
+	/*
+	returns an array of angles
+	angles[n] := the angle between edge n and edge n+1
+	*/
 	REAL *angles = (REAL*) malloc(points*sizeof(REAL));
 	for(int i=0;i<points;i++){
 		angles[i] = anglebetween(
@@ -334,5 +315,6 @@ REAL kawasakisum(REAL *angles, int anglecount, int parity){
 		accum += angles[ind];
 		ind += 2;
 	}
+	printf("%f",accum);
 	return accum;
 }
