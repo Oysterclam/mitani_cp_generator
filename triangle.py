@@ -17,7 +17,7 @@ non_edge_points = 5
 edge_random_multiplier = 1
 
 def rotation_ordered_neighbors(G,points,s):
-    neighbors = [points[i] for i in range(0,len(G)) if G[s][i]==1 and not i == s]
+    neighbors = [points[i] for i in range(len(G)) if G[s][i]==1 and not i == s]
     return sorted(neighbors, key=lambda p : math.atan2(p[0] - points[s][0], p[1] - points[s][1]))
 
 def bfs(G,s):
@@ -100,15 +100,15 @@ class crease_pattern(Frame):
         #initializing points
         points = []
         points.extend(square)
-        for i in range(0,non_edge_points):
+        for i in range(non_edge_points):
             points.append([random()*scale+offset_x,random()*scale+offset_y])
-        for i in range(0,1+int(random()*edge_random_multiplier)):
+        for i in range(1+int(random()*edge_random_multiplier)):
             points.append([offset_x,random()*scale+offset_y])
-        for i in range(0,1+int(random()*edge_random_multiplier)):
+        for i in range(1+int(random()*edge_random_multiplier)):
             points.append([scale+offset_x,random()*scale+offset_y])
-        for i in range(0,1+int(random()*edge_random_multiplier)):
+        for i in range(1+int(random()*edge_random_multiplier)):
             points.append([random()*scale+offset_x,offset_y])
-        for i in range(0,1+int(random()*edge_random_multiplier)):
+        for i in range(1+int(random()*edge_random_multiplier)):
             points.append([random()*scale+offset_x,scale+offset_y])
 
         #initializing graph adjacency matrix
@@ -143,7 +143,7 @@ class crease_pattern(Frame):
                 if graph[i][j]==1:
                     canvas.create_line(points1[i][0], points1[i][1], points1[j][0], points1[j][1])
         #draw square
-        for i in range(0,4):
+        for i in range(4):
             canvas.create_line(square[i][0]+scale+offset_x, square[i][1], square[(i+1)%4][0]+scale+offset_x, square[(i+1)%4][1])
 
 
@@ -176,12 +176,12 @@ class crease_pattern(Frame):
         #     print()
 
         #get
-        odd = [i for i in range(0,len(degrees)) if degrees[i]%2==1]
+        odd = [i for i in range(len(degrees)) if degrees[i]%2==1]
         print(odd)
 
         #delete paths between odd vertices, paired in order
         #we use the bfs created shortest paths to achieve this
-        for i in range(0,int(len(odd)/2)):
+        for i in range(int(len(odd)/2)):
             s=odd[2*i]
             t=odd[2*i+1]
             path = paths[s][t]
@@ -242,7 +242,7 @@ class crease_pattern(Frame):
                 if graph[i][j]==1:
                     canvas.create_line(points[i][0], points[i][1], points[j][0], points[j][1])
         #draw square
-        for i in range(0,4):
+        for i in range(4):
             canvas.create_line(square[i][0], square[i][1], square[(i+1)%4][0], square[(i+1)%4][1])
 
         canvas.pack(fill=BOTH, expand=1)
